@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Love Vault </title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+html,body{
+margin:0;
+padding:0;
+height:100%;
+overflow:hidden;
+font-family:Arial;
+color:white;
+}
+
+.bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:url("mine.jpg") center/cover no-repeat;
+filter:blur(18px) brightness(0.5);
+z-index:-3;
+}
+
+#fireworks{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+z-index:-2;
+}
+
+.page{
+position:absolute;
+width:100%;
+height:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+transition:0.5s;
+}
+
+.hidden{
+opacity:0;
+pointer-events:none;
+filter:blur(10px);
+}
+
+.glass{
+background:rgba(255,255,255,0.12);
+padding:25px;
+border-radius:20px;
+backdrop-filter:blur(15px);
+max-width:95%;
+}
+
+input{
+padding:10px;
+border-radius:20px;
+border:none;
+text-align:center;
+outline:none;
+}
+
+.btn{
+padding:12px 28px;
+border:none;
+border-radius:30px;
+cursor:pointer;
+margin:10px;
+font-weight:bold;
+background:linear-gradient(45deg,#ff4d6d,#ff99ac);
+color:white;
+box-shadow:0 5px 15px rgba(255,0,80,0.4);
+transition:0.3s;
+}
+
+.btn:hover{
+transform:scale(1.08);
+}
+
+/* Gallery */
+.gallery{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:30px;
+margin-top:20px;
+}
+
+.card{ perspective:1000px; }
+
+.card-inner{
+width:170px;
+height:220px;
+position:relative;
+transition:0.8s;
+transform-style:preserve-3d;
+}
+
+.card:hover .card-inner{
+transform:rotateY(180deg);
+}
+
+.card-front,.card-back{
+position:absolute;
+width:100%;
+height:100%;
+backface-visibility:hidden;
+border-radius:15px;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.card-front img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.card-back{
+background:black;
+color:gold;
+transform:rotateY(180deg);
+padding:10px;
+font-size:14px;
+}
+
+#counter{
+position:fixed;
+bottom:15px;
+left:50%;
+transform:translateX(-50%);
+background:rgba(0,0,0,0.4);
+padding:8px 15px;
+border-radius:25px;
+font-size:14px;
+}
+
+#anniversaryBtn{
+display:none;
+margin-top:15px;
+background:linear-gradient(45deg,gold,#ff4d6d);
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg"></div>
+<canvas id="fireworks"></canvas>
+
+<!-- LOCK -->
+<div id="lockPage" class="page">
+<div class="glass">
+<h2>Enter Our Secret Password </h2>
+<input type="password" id="passwordInput">
+<br><br>
+<button class="btn" id="unlockBtn">Unlock My Heart </button>
+</div>
+</div>
+
+<!-- GALLERY -->
+<div id="galleryPage" class="page hidden">
+<div class="glass">
+<h2>Our Memories </h2>
+<button class="btn" id="proposalBtn">Proposal </button>
+<div class="gallery" id="gallery"></div>
+</div>
+</div>
+
+<!-- PROPOSAL -->
+<div id="proposalPage" class="page hidden">
+<div class="glass">
+<h2>Will You Stay Forever? </h2>
+<button class="btn" id="yesBtn">Yes </button>
+<button class="btn" id="noBtn">No </button>
+</div>
+</div>
+
+<!-- FINAL -->
+<div id="finalPage" class="page hidden">
+<div class="glass">
+<h1>Forever Us </h1>
+<p id="typing"></p>
+<button class="btn" id="anniversaryBtn">Happy Anniversary </button>
+</div>
+</div>
+
+<div id="counter"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+
+const unlockBtn=document.getElementById("unlockBtn");
+const passwordInput=document.getElementById("passwordInput");
+const lockPage=document.getElementById("lockPage");
+const galleryPage=document.getElementById("galleryPage");
+const proposalPage=document.getElementById("proposalPage");
+const finalPage=document.getElementById("finalPage");
+const proposalBtn=document.getElementById("proposalBtn");
+const yesBtn=document.getElementById("yesBtn");
+const noBtn=document.getElementById("noBtn");
+const anniversaryBtn=document.getElementById("anniversaryBtn");
+
+unlockBtn.onclick=function(){
+if(passwordInput.value.trim().toLowerCase()==="mahi"){
+lockPage.classList.add("hidden");
+setTimeout(()=>galleryPage.classList.remove("hidden"),400);
+startCounter();
+}else{
+alert("Wrong Password ");
+}
+};
+
+proposalBtn.onclick=function(){
+galleryPage.classList.add("hidden");
+setTimeout(()=>proposalPage.classList.remove("hidden"),400);
+};
+
+yesBtn.onclick=function(){
+proposalPage.classList.add("hidden");
+setTimeout(()=>{
+finalPage.classList.remove("hidden");
+startTyping();
+startShow();
+checkAnniversary();
+},400);
+};
+
+noBtn.onmouseover=noBtn.onclick=function(){
+noBtn.style.position="fixed";
+noBtn.style.left=Math.random()*80+"%";
+noBtn.style.top=Math.random()*80+"%";
+};
+
+function startTyping(){
+let text="You are my today and all my tomorrows.";
+let i=0;
+typing.innerHTML="";
+(function type(){
+if(i<text.length){
+typing.innerHTML+=text[i++];
+setTimeout(type,60);
+}
+})();
+}
+
+/* GALLERY */
+let imgs=["mine1.jpg","mine2.jpg","mine3.jpg","mine4.jpg",
+"mine5.jpg","mine6.jpg","mine7.jpg","mine8.jpg"];
+
+let caps=[
+"First Smile ",
+"Your Eyes ",
+"Our Day ",
+"Forever Us ",
+"My Happiness ",
+"Crazy Moments ",
+"Sweet Memories ",
+"My Always "
+];
+
+imgs.forEach((img,i)=>{
+gallery.innerHTML+=`
+<div class="card">
+<div class="card-inner">
+<div class="card-front"><img src="${img}"></div>
+<div class="card-back">${caps[i]}</div>
+</div>
+</div>`;
+});
+
+/* TIMER + ANNIVERSARY */
+let startDate=new Date("2025-04-16T00:00:00");
+
+function startCounter(){
+setInterval(()=>{
+let now=new Date();
+let diff=now-startDate;
+let d=Math.floor(diff/86400000);
+let h=Math.floor(diff/3600000)%24;
+let m=Math.floor(diff/60000)%60;
+let s=Math.floor(diff/1000)%60;
+counter.innerHTML=d+"D "+h+"H "+m+"M "+s+"S ";
+},1000);
+}
+
+function checkAnniversary(){
+let now=new Date();
+let diff=now-startDate;
+let days=Math.floor(diff/86400000);
+if(days>=365){
+anniversaryBtn.style.display="inline-block";
+}
+}
+
+anniversaryBtn.onclick=function(){
+alert("Happy 1st Anniversary My Love \n365 Days of Us & Forever to Go ");
+};
+
+/* FIREWORKS same as previous */
+let canvas=document.getElementById("fireworks");
+let ctx=canvas.getContext("2d");
+
+function resize(){
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+}
+resize();
+window.addEventListener("resize",resize);
+
+let rockets=[],particles=[],hearts=[];
+let fireColors=["#ff0000","#000000","#2E8B57","#FFD700"];
+let heartColors=["#ff69b4","#87ceeb","#ffff00","#ff0000"];
+
+function random(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function launchRocket(){
+rockets.push({x:Math.random()*canvas.width,y:canvas.height,vx:(Math.random()-0.5)*1.5,vy:-9,color:random(fireColors)});
+}
+
+function explode(x,y,color){
+for(let i=0;i<130;i++){
+particles.push({x:x,y:y,vx:(Math.random()-0.5)*8,vy:(Math.random()-0.5)*8,life:100,color:color});
+}
+}
+
+function launchHeart(){
+hearts.push({x:Math.random()*canvas.width,y:canvas.height,vx:(Math.random()-0.5)*1,vy:-7,life:130,color:random(heartColors)});
+}
+
+let interval;
+function startShow(){
+if(interval) return;
+interval=setInterval(()=>{
+launchRocket();
+if(Math.random()<0.5) launchHeart();
+},900);
+}
+
+function drawHeart(x,y,size,color){
+ctx.fillStyle=color;
+ctx.beginPath();
+ctx.moveTo(x,y);
+ctx.bezierCurveTo(x,y-size/2,x-size/2,y-size/2,x-size/2,y);
+ctx.bezierCurveTo(x-size/2,y+size/2,x,y+size,x,y+size);
+ctx.bezierCurveTo(x,y+size,x+size/2,y+size/2,x+size/2,y);
+ctx.bezierCurveTo(x+size/2,y-size/2,x,y-size/2,x,y);
+ctx.fill();
+}
+
+function animate(){
+ctx.fillStyle="rgba(0,0,0,0.25)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+rockets.forEach((r,i)=>{
+r.x+=r.vx;r.y+=r.vy;r.vy+=0.05;
+ctx.fillStyle=r.color;
+ctx.fillRect(r.x,r.y,3,14);
+if(r.vy>=0){explode(r.x,r.y,r.color);rockets.splice(i,1);}
+});
+
+particles.forEach((p,i)=>{
+p.x+=p.vx;p.y+=p.vy;p.vy+=0.05;p.life--;
+ctx.globalAlpha=p.life/100;
+ctx.fillStyle=p.color;
+ctx.fillRect(p.x,p.y,3,3);
+ctx.globalAlpha=1;
+if(p.life<=0)particles.splice(i,1);
+});
+
+hearts.forEach((h,i)=>{
+h.x+=h.vx;h.y+=h.vy;h.vy+=0.03;h.life--;
+ctx.globalAlpha=h.life/130;
+drawHeart(h.x,h.y,12,h.color);
+ctx.globalAlpha=1;
+if(h.life<=0)hearts.splice(i,1);
+});
+
+requestAnimationFrame(animate);
+}
+animate();
+
+});
+</script>
+</body>
+</html>
